@@ -1,0 +1,92 @@
+{
+    "actionType": {
+        "실행": [
+            {
+                "appName": "유튜브",
+                "uri": "intent://m.youtube.com#Intent;scheme=https;end"
+            },
+            {
+                "appName": "구글",
+                "uri": "intent://google.com#Intent;scheme=https;end"
+            },
+            {
+                "appName": "네이버",
+                "uri": "intent://m.naver.com#Intent;scheme=https;end"
+            },
+            {
+                "appName": "다음",
+                "uri": "intent://open#Intent;scheme=daumapps;end"
+            },
+            {
+                "appName": "지도",
+                "uri": "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MAPS;end"
+            },
+            {
+                "appName": "달력",
+                "uri": "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CALENDAR;end"
+            },
+            {
+                "appName": "전화번호부",
+                "uri": "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_CONTACTS;end"
+            },
+            {
+                "appName": "이메일",
+                "uri": "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_EMAIL;end"
+            },
+            {
+                "appName": "갤러리",
+                "uri": "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_GALLERY;end"
+            },
+            {
+                "appName": "마켓앱",
+                "uri": "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MARKET;end"
+            },
+            {
+                "appName": "메시지",
+                "uri": "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MESSAGING;end"
+            },
+            {
+                "appName": "뮤직",
+                "uri": "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.APP_MUSIC;end"
+            },
+            {
+                "appName": "음성 검색",
+                "uri": "intent:#Intent;action=android.intent.action.SEARCH_LONG_PRESS;end"
+            }
+        ],
+        "검색": [
+            {
+                "appName": "유튜브",
+                "uri": "intent://m.youtube.com/results?search_query={search_keyword}#Intent;scheme=https;end"
+            },
+            {
+                "appName": "구글",
+                "uri": "intent://google.com/search?q={search_keyword}#Intent;scheme=https;end"
+            },
+            {
+                "appName": "네이버",
+                "uri": "intent://m.search.naver.com/search.naver?query={search_keyword}#Intent;scheme=https;end"
+            },
+            {
+                "appName": "다음",
+                "uri": "intent://search?keyword={search_keyword}#Intent;scheme=daumapps;end"
+            },
+            {
+                "appName": "지도",
+                "uri": "intent:0,0?q={search_keyword}#Intent;scheme=geo;end"
+            },
+            {
+                "appName": "웹",
+                "uri": "intent:#Intent;action=android.intent.action.WEB_SEARCH;S.query={search_keyword};end"
+            },
+            {
+                "appName": "전화",
+                "uri": "intent:{search_keyword}#Intent;scheme=tel;action=android.intent.action.CALL;end"
+            },
+            {
+                "appName": "다이얼",
+                "uri": "intent:{search_keyword}#Intent;scheme=tel;action=android.intent.action.DIAL;end"
+            }
+        ]
+    }
+}
