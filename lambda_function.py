@@ -42,7 +42,7 @@ def lambda_handler(event, context):
       "version": "2.0",
       "resultCode": "OK",
       "output": {
-         "appName": app_name_compared,
+         "appName": most_similar_app_name,
          "appExec": appExec,
     "searchKeyword": searchKeyword
       },
