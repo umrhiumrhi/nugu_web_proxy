@@ -1,6 +1,6 @@
 {
     "actionType": {
-        "실행": [
+        "action.execute.app": [
             {
                 "appName": "유튜브",
                 "uri": "intent://m.youtube.com#Intent;scheme=https;end"
@@ -54,29 +54,29 @@
                 "uri": "intent:#Intent;action=android.intent.action.SEARCH_LONG_PRESS;end"
             }
         ],
-        "검색": [
+        "action.search.app": [
             {
-                "appName": "유튜브",
+                "appName": "YouTube",
                 "uri": "intent://m.youtube.com/results?search_query={search_keyword}#Intent;scheme=https;end"
             },
             {
-                "appName": "구글",
+                "appName": "Google",
                 "uri": "intent://google.com/search?q={search_keyword}#Intent;scheme=https;end"
             },
             {
-                "appName": "네이버",
+                "appName": "NAVER",
                 "uri": "intent://m.search.naver.com/search.naver?query={search_keyword}#Intent;scheme=https;end"
             },
             {
                 "appName": "다음",
-                "uri": "intent://search?keyword={search_keyword}#Intent;scheme=daumapps;end"
+                "uri": "intent://m.search.daum.net/search?q={search_keyword}#Intent;scheme=https;end"
             },
             {
                 "appName": "지도",
                 "uri": "intent:0,0?q={search_keyword}#Intent;scheme=geo;end"
             },
             {
-                "appName": "웹",
+                "appName": "인터넷",
                 "uri": "intent:#Intent;action=android.intent.action.WEB_SEARCH;S.query={search_keyword};end"
             },
             {
