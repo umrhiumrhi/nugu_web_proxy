@@ -72,6 +72,10 @@ class similarity_checker:
 
     def sub_cost(self, c1, c2):
         if c1 == c2: return 0.0
+        if self.alphabet_check(c1) is True and self.alphabet_check(c2) is True :
+            return self.get_levenshtein_distance(c1.lower(), c2.lower())
+        elif self.alphabet_check(c1) is True or self.alphabet_check(c2) is True or c2.isdigit() or c1.isdigit() :
+            return 1
         else: return self.get_levenshtein_distance(self.decompose(c1), self.decompose(c2)) / 3.0
         
     def find_similarity(self, s1, s2):
@@ -86,3 +90,8 @@ class similarity_checker:
             result = 1
         
         return result
+    
+    def alphabet_check(self, c) :
+        if 'a' <= c.lower() <= 'z':
+            return True
+        else : return False
