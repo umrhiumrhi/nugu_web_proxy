@@ -3,9 +3,11 @@ import os
 from num_for_check import *
 from similarity_checker import *
 from bs4 import BeautifulSoup
-
+import api_key
+import random
 
 use_original_name = 0
+youtube_api_key = api_key.YOUTUBE_API_KEY
 
 def lambda_handler(event, context):
     
@@ -21,12 +23,7 @@ def lambda_handler(event, context):
     print("[json]: ",event)
     
     action = event["action"]["actionName"]
-    
-    if action == "action.execute.app":
-        appName = event["action"]["parameters"]["appName"]["value"]
-    elif action == "action.search.app":
-        appName = event["action"]["parameters"]["searchAppName"]["value"]
-    
+        
     searchKeyword = ""
     
     resolve_info_list = event["context"]["supportedInterfaces"]["Extension"]["data"]["applicationList"]
@@ -36,14 +33,35 @@ def lambda_handler(event, context):
     most_similar_app_name = ""
     most_similar_idx = -1
     pkg = ""
+    final_pkg = ""
+    play_type = None
 
-    
-    if  action != "action.exit.app":
-        pkg = search_app_on_market(appName)
-        print("[found pkg]", pkg)
+    if  action == "action.search.app":
+        searchKeyword = event["action"]["parameters"]["searchKeyword"]["value"]
+    elif action == "action.mediaplay.app":
+        searchKeyword = event["action"]["parameters"]["playKeyword"]["value"]
+        
+    if action == "action.execute.app":
+        appName = event["action"]["parameters"]["appName"]["value"]
+    elif action == "action.search.app":
+        appName = event["action"]["parameters"]["searchAppName"]["value"]
+    elif action == "action.mediaplay.app":
+        try:
+            appName = event["action"]["parameters"]["playAppName"]["value"]
+        except:
+            play_type = event["action"]["parameters"].get("playType")
+            print("[play_type]", play_type)
+            if play_type is not None:
+                play_type = play_type["value"]
+        
+    if  action not in ["action.exit.app"]:
+        if appName != "":
+            pkg = search_app_on_market(appName)
+            print("[found pkg]", pkg)
         
         for idx, resolve_info in enumerate(resolve_info_list):
             if pkg == resolve_info["packageName"]:
+                final_pkg = resolve_info["packageName"]
                 most_similar_idx = idx
                 most_similar_app_name = resolve_info["appName"]
                 break
@@ -58,12 +76,11 @@ def lambda_handler(event, context):
                     most_similar_app_name = app_name_compared
                     most_similar_idx = idx
                     if similarity >= COMPLETE_MATCH : break
-        if  action == "action.search.app":
-            searchKeyword = event["action"]["parameters"]["searchKeyword"]["value"]
+
         
     # targetUri = getExecUri    action, appName, searchKeyword) 
     if most_similar_app_name == "" : most_similar_app_name = appName
-    targetUri = getExecUri(most_similar_idx, resolve_info_list, action, appName, searchKeyword, most_similar_app_name)
+    targetUri = getExecUri(most_similar_idx, resolve_info_list, action, appName, searchKeyword, most_similar_app_name, final_pkg, play_type)
     
     if use_original_name:
         most_similar_app_name = appName
@@ -96,21 +113,36 @@ def lambda_handler(event, context):
         'body': json.dumps(json_object, ensure_ascii=False)
     }
 
-def getExecUri(idx, resolve_info_list, action, app_name, keyword, most_similar_name):
+def getExecUri(idx, resolve_info_list, action, app_name, keyword, most_similar_name, final_pkg, play_type):
     
     global use_original_name
     
-    if action == "action.execute.app":
+    if action == "action.mediaplay.app":
+        if app_name.lower() == "youtube" or ((play_type is None or play_type == "영상") and final_pkg == ""):
+            print("[final pkg]", final_pkg)
+            return media_play_youtube(keyword)
+        else:
+            return media_play_music(keyword, final_pkg)
+            
+    elif action == "action.execute.app":
         if idx == -1 : return
         return resolve_info_list[idx]["intentList"][0]["intentInfo"]["intent"]
         
     elif action == "action.search.app":
         tmp_uri = ""
         
-        for info in resolve_info_list[idx]["intentList"]:
-            if "WEB_SEARCH" in info["intentInfo"]["intent"] :
-                tmp_uri = info["intentInfo"]["intent"].replace(";end", ";S.query="+keyword+";end")
+        if idx != -1 :
+            for map_string in ["map", "지도", "맵"] :
+                if map_string in app_name.lower() and app_name != "지도":
+                    pkg = resolve_info_list[idx]["packageName"]
+                    uri = "intent:0,0?q={}#Intent;scheme=geo;package={};end".format(keyword, pkg)
+                    return uri
                 
+        
+        for info in resolve_info_list[idx]["intentList"]:
+            if "SEARCH" in info["intentInfo"]["intent"] :
+                tmp_uri = info["intentInfo"]["intent"].replace(";end", ";S.query="+keyword+";end")
+            
         if tmp_uri != "" : return tmp_uri 
         
         with open("app-exec-set.json", 'r', encoding='UTF-8') as file:
@@ -126,7 +158,7 @@ def getExecUri(idx, resolve_info_list, action, app_name, keyword, most_similar_n
     elif action == "action.exit.app":
         return "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x4000000;end"
     
-    return ""
+    return None
 
 def search_app_on_market(query):
     
@@ -152,3 +184,33 @@ def search_app_on_market(query):
                 pkg = data["href"][k+1:]
 
     return pkg
+
+def media_play_youtube(query):
+    
+    intent_uri = ""
+    headers = {'User-Agent':'Mozilla/5.0'}
+    count = 5
+    
+    url = "https://www.googleapis.com/youtube/v3/search?key={}&maxResults={}&part=id&type=video&q={}".format(youtube_api_key, count, query)
+    response = requests.get(url, headers = headers)
+    
+    tmp = json.loads(response.text)
+    
+    if len(tmp["items"]) != 0:
+        videoId = random.choice(tmp["items"])["id"]["videoId"]
+        intent_uri = "intent://m.youtube.com/watch?v={}#Intent;scheme=https;end".format(videoId)
+    
+    return intent_uri
+
+def media_play_music(query, pkg):
+    
+    intent_uri = ""
+    
+    if query != "" and pkg in TMP_MUSIC_APP_LIST:
+        if pkg != "":
+            intent_uri = "intent:#Intent;action=android.media.action.MEDIA_PLAY_FROM_SEARCH;package={};S.query={};S.android.intent.extra.focus=vnd.android.cursor.item%2F*;end".format(pkg, query)
+        else:
+            intent_uri = "intent:#Intent;action=android.media.action.MEDIA_PLAY_FROM_SEARCH;S.query={};S.android.intent.extra.focus=vnd.android.cursor.item%2F*;end".format(query)
+    return intent_uri
+
+        
