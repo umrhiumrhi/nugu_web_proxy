@@ -56,17 +56,6 @@ def lambda_handler(event, context):
         
     if  action not in ["action.exit.app"]:
         if appName != "":
-            pkg = search_app_on_market(appName)
-            print("[found pkg]", pkg)
-        
-        for idx, resolve_info in enumerate(resolve_info_list):
-            if pkg == resolve_info["packageName"]:
-                final_pkg = resolve_info["packageName"]
-                most_similar_idx = idx
-                most_similar_app_name = resolve_info["appName"]
-                break
-                
-        if most_similar_idx == -1:
             for idx, resolve_info in enumerate (resolve_info_list) :
                 app_name_compared = resolve_info["appName"]
                 similarity = similarity_checker().find_similarity(appName, app_name_compared)
@@ -76,6 +65,17 @@ def lambda_handler(event, context):
                     most_similar_app_name = app_name_compared
                     most_similar_idx = idx
                     if similarity >= COMPLETE_MATCH : break
+
+        if most_similar_idx == -1:
+            pkg = search_app_on_market(appName)
+            print("[found pkg]", pkg)
+        
+            for idx, resolve_info in enumerate(resolve_info_list):
+                if pkg == resolve_info["packageName"]:
+                    final_pkg = resolve_info["packageName"]
+                    most_similar_idx = idx
+                    most_similar_app_name = resolve_info["appName"]
+                    break
 
         
     # targetUri = getExecUri    action, appName, searchKeyword) 
@@ -122,7 +122,7 @@ def getExecUri(idx, resolve_info_list, action, app_name, keyword, most_similar_n
             print("[final pkg]", final_pkg)
             return media_play_youtube(keyword)
         else:
-            return media_play_music(keyword, final_pkg)
+            return media_play_music(keyword, final_pkg, app_name)
             
     elif action == "action.execute.app":
         if idx == -1 : return
@@ -202,11 +202,11 @@ def media_play_youtube(query):
     
     return intent_uri
 
-def media_play_music(query, pkg):
+def media_play_music(query, pkg, app_name):
     
     intent_uri = ""
     
-    if query != "" and pkg in TMP_MUSIC_APP_LIST:
+    if query != "" and (pkg in TMP_MUSIC_APP_LIST or app_name == ""):
         if pkg != "":
             intent_uri = "intent:#Intent;action=android.media.action.MEDIA_PLAY_FROM_SEARCH;package={};S.query={};S.android.intent.extra.focus=vnd.android.cursor.item%2F*;end".format(pkg, query)
         else:
